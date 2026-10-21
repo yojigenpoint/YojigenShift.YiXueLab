@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.oriental-card {
+  background-color: #FFFDF9;
+  border: 1px solid #DFD7C8;
+}
