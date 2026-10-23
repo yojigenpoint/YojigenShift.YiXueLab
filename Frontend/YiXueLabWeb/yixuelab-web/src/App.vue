@@ -9,7 +9,7 @@ const route = useRoute();
 <template>
   <div
     class="min-h-screen bg-[#E5E0D5] flex flex-col items-center"
-    :class="{ 'text-[108%]': authStore.isElderFontLarge }"
+    :class="{ 'elder-font-lg': authStore.isElderFontLarge }"
   >
     <div class="w-full max-w-md bg-paper-bg min-h-screen flex flex-col justify-between shadow-2xl border-x border-paper-border">
       <!-- 顶部古风导航栏 (登录页隐藏) -->
@@ -35,8 +35,8 @@ const route = useRoute();
       </header>
 
       <!-- 路由视图容器 -->
-      <main class="flex-1 p-3.5 pb-20">
-        <router-view />
+      <main class="flex-1 overflow-y-auto pb-24 px-3.5 pt-3">
+        <router-view :key="$route.fullPath" />
       </main>
 
       <!-- 底部固定导航栏 (登录页隐藏) -->

@@ -29,7 +29,8 @@ namespace YojigenShift.YiXueLab.DAL
             {
                 IncludeFields = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                AllowOutOfOrderMetadataProperties = true
             });
 
             var dataSource = dataSourceBuilder.Build();

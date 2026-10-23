@@ -6,3 +6,28 @@
   background-color: #FFFDF9;
   border: 1px solid #DFD7C8;
 }
+
+/* 适老化大字号模式：精准放大各级阅读字号，同时保持卡片间距与布局不被撑破 */
+.elder-font-lg {
+  font-size: 110%;
+}
+.elder-font-lg .text-xs {
+  font-size: 0.875rem !important; /* 12px -> 14px */
+  line-height: 1.35rem !important;
+}
+.elder-font-lg .text-sm {
+  font-size: 1rem !important;     /* 14px -> 16px */
+  line-height: 1.5rem !important;
+}
+.elder-font-lg .text-base {
+  font-size: 1.15rem !important;  /* 16px -> 18.4px */
+  line-height: 1.75rem !important;
+}
+.elder-font-lg .text-lg {
+  font-size: 1.3rem !important;   /* 18px -> 20.8px */
+  line-height: 1.85rem !important;
+}
+.elder-font-lg .text-2xl {
+  font-size: 1.75rem !important;  /* 24px -> 28px (八字天干地支大字) */
+  line-height: 2.15rem !important;
+}

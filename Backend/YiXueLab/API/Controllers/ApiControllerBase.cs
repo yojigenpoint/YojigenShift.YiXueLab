@@ -44,7 +44,10 @@ namespace YojigenShift.YiXueLab.API.Controllers
         {
             if (result.IsSuccess)
             {
-                return Ok(result.Data);
+                return new OkObjectResult(result.Data)
+                {
+                    DeclaredType = typeof(T)
+                };
             }
 
             return MapErrorToHttpResult(result.ErrorCode, result.ErrorMessage);

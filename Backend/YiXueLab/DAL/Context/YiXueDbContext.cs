@@ -1,11 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using YojigenShift.YiXueLab.DAL.Entities;
 using YojigenShift.YiXueLab.DAL.Enums;
+using YojigenShift.YiXueLab.DAL.JsonModels;
 
 namespace YojigenShift.YiXueLab.DAL.Context
 {
     public class YiXueDbContext : DbContext
     {
+        private static readonly JsonSerializerOptions JsonbSerializerOptions = new()
+        {
+            IncludeFields = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            AllowOutOfOrderMetadataProperties = true
+        };
+
         public YiXueDbContext(DbContextOptions<YiXueDbContext> options) : base(options)
         {
         }
@@ -65,13 +77,20 @@ namespace YojigenShift.YiXueLab.DAL.Context
             });
 
             // --- 3. 配置 Cases 表 ---
+            var payloadConverter = new ValueConverter<DivinationPayloadBase, string>(
+                v => SerializeDivinationPayload(v),
+                v => DeserializeDivinationPayload(v)
+            );
+
             modelBuilder.Entity<DivinationCaseEntity>(entity =>
             {
                 entity.HasQueryFilter(c => !c.IsDeleted);
 
                 entity.Property(c => c.CreatedAt).HasDefaultValueSql("NOW()");
                 entity.Property(c => c.IsDeleted).HasDefaultValue(false);
-                entity.Property(c => c.DivinationData).HasColumnType("jsonb");
+                entity.Property(c => c.DivinationData)
+                      .HasColumnType("jsonb")
+                      .HasConversion(payloadConverter);
 
                 entity.HasIndex(c => new { c.Status, c.DivinationType, c.CreatedAt })
                       .HasFilter("is_deleted = false");
@@ -137,6 +156,37 @@ namespace YojigenShift.YiXueLab.DAL.Context
                       .HasForeignKey(ct => ct.TagId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+        }
+
+        /// <summary>
+        /// 强制以抽象基类 DivinationPayloadBase 进行序列化，确保 100% 写入 "$type" 多态鉴别器
+        /// </summary>
+        private static string SerializeDivinationPayload(DivinationPayloadBase payload)
+        {
+            return JsonSerializer.Serialize<DivinationPayloadBase>(payload, JsonbSerializerOptions);
+        }
+
+        /// <summary>
+        /// 多态反序列化（兼容 PostgreSQL jsonb 字段乱序，并自动兜底修复缺少 "$type" 的历史记录）
+        /// </summary>
+        private static DivinationPayloadBase DeserializeDivinationPayload(string json)
+        {
+            if (json.Contains("\"$type\"", StringComparison.Ordinal))
+            {
+                return JsonSerializer.Deserialize<DivinationPayloadBase>(json, JsonbSerializerOptions)!;
+            }
+
+            // 兜底兼容：若数据库中已存在未带 "$type" 的旧记录，按特征字段自动识别子类
+            if (json.Contains("\"daYun\"", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Deserialize<BaziCaseData>(json, JsonbSerializerOptions)!;
+            if (json.Contains("\"original\"", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Deserialize<LiuYaoCaseData>(json, JsonbSerializerOptions)!;
+            if (json.Contains("\"chart\"", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Deserialize<QiMenCaseData>(json, JsonbSerializerOptions)!;
+            if (json.Contains("\"castMethod\"", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Deserialize<MeiHuaCaseData>(json, JsonbSerializerOptions)!;
+
+            return JsonSerializer.Deserialize<DivinationPayloadBase>(json, JsonbSerializerOptions)!;
         }
 
         /// <summary>
