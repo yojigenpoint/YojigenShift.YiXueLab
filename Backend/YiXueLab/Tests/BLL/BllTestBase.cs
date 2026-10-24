@@ -27,6 +27,7 @@ namespace YojigenShift.YiXueLab.Tests.BLL
         protected IDivinationPlotterService PlotterService = null!;
         protected IAuthService AuthService = null!;
         protected ICaseService CaseService = null!;
+        protected IAiAssistantService AiService = null!;
 
         public async ValueTask InitializeAsync()
         {
@@ -61,6 +62,7 @@ namespace YojigenShift.YiXueLab.Tests.BLL
             PlotterService = Scope.ServiceProvider.GetRequiredService<IDivinationPlotterService>();
             AuthService = Scope.ServiceProvider.GetRequiredService<IAuthService>();
             CaseService = Scope.ServiceProvider.GetRequiredService<ICaseService>();
+            AiService = Scope.ServiceProvider.GetRequiredService<IAiAssistantService>();
 
             await DbContext.Database.EnsureCreatedAsync();
         }

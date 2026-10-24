@@ -7,8 +7,10 @@ import type {
   DivinationPayload,
   DivinationType,
   PagedResultDto,
+  PolishReadingResponseDto,
   PublishCaseRequestDto,
   ReadingDto,
+  SuggestTagsResponseDto,
   YiGlobalDictionary
 } from '../types/yixue';
 
@@ -99,5 +101,37 @@ export const casesApi = {
   /** 为群友断语点赞 (+1) */
   async likeReading(readingId: string): Promise<void> {
     await http.post(`/cases/readings/${readingId}/like`);
+  }
+};
+
+export const aiApi = {
+  /** 调用 AI 将断语草稿梳理为对应门类的三段式标准结构 */
+  async polishReading(
+    divinationType: DivinationType,
+    rawContent: string,
+    questionContext?: string
+  ): Promise<PolishReadingResponseDto> {
+    const { data } = await http.post<PolishReadingResponseDto>('/ai/polish-reading', {
+      divinationType,
+      rawContent,
+      questionContext
+    });
+    return data;
+  },
+
+  /** 发布案例时，调用 AI 根据背景、问题与反馈自动提炼考点标签 */
+  async suggestTags(
+    divinationType: DivinationType,
+    backgroundInfo: string,
+    questionText: string,
+    realFeedback?: string
+  ): Promise<SuggestTagsResponseDto> {
+    const { data } = await http.post<SuggestTagsResponseDto>('/ai/suggest-tags', {
+      divinationType,
+      backgroundInfo,
+      questionText,
+      realFeedback
+    });
+    return data;
   }
 };

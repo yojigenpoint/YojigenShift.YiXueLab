@@ -289,3 +289,13 @@ export interface PublishCaseRequestDto {
   lunarMonth?: number | null;
   lunarDay?: number | null;
 }
+
+export interface PolishReadingResponseDto {
+polishedContent: string;
+isRuleFallback: boolean;
+}
+
+export interface SuggestTagsResponseDto {
+tags: string[];
+isRuleFallback: boolean;
+}

@@ -10,7 +10,7 @@ namespace YojigenShift.YiXueLab.Tests.API
     public class MetaControllerTests : ApiTestBase
     {
         [Fact(DisplayName = "元数据与排盘预览：应正确返回全局术语字典，且排盘预览能正确区分 200 与 400")]
-        public void MetaController_Dictionary_And_PreviewPlot_Should_Work()
+        public async Task MetaController_Dictionary_And_PreviewPlot_Should_Work()
         {
             // Act 1: 获取全局多语言字典
             var dictResult = MetaController.GetGlobalDictionary();
@@ -48,6 +48,22 @@ namespace YojigenShift.YiXueLab.Tests.API
             var previewBad = MetaController.PreviewPlot(invalidPreviewReq)
                 .Should().BeOfType<ObjectResult>().Subject;
             previewBad.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+
+            // Act 4: 验证 AiController 断语润色与智能标签提取接口
+            var polishOk = (await AiController.PolishReading(new PolishReadingRequestDto(
+                DivinationType.LiuYao,
+                "世爻酉金临月建极旺但旬空。五爻独发化申金。断在家中正西方抽屉必能找回。")))
+                .Should().BeOfType<OkObjectResult>().Subject;
+            polishOk.Value.Should().BeOfType<PolishReadingResponseDto>();
+
+            var tagsOk = (await AiController.SuggestTags(new SuggestTagsRequestDto(
+                DivinationType.Bazi,
+                "男命2018戊戌年辰戌冲",
+                "问何事？",
+                "工作变动且脾胃手术")))
+                .Should().BeOfType<OkObjectResult>().Subject;
+            var tagsDto = tagsOk.Value.Should().BeOfType<SuggestTagsResponseDto>().Subject;
+            tagsDto.Tags.Should().Contain("#辰戌冲");
         }
     }
 }

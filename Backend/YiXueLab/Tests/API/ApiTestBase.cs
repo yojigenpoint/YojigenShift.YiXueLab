@@ -40,6 +40,7 @@ namespace YojigenShift.YiXueLab.Tests.API
         protected MetaController MetaController = null!;
         protected AuthController AuthController = null!;
         protected CasesController CasesController = null!;
+        protected AiController AiController = null!;
 
         public async ValueTask InitializeAsync()
         {
@@ -84,6 +85,7 @@ namespace YojigenShift.YiXueLab.Tests.API
             services.AddScoped<MetaController>();
             services.AddScoped<AuthController>();
             services.AddScoped<CasesController>();
+            services.AddScoped<AiController>();
 
             RootServiceProvider = services.BuildServiceProvider();
             Scope = RootServiceProvider.CreateScope();
@@ -95,9 +97,10 @@ namespace YojigenShift.YiXueLab.Tests.API
             MetaController = Scope.ServiceProvider.GetRequiredService<MetaController>();
             AuthController = Scope.ServiceProvider.GetRequiredService<AuthController>();
             CasesController = Scope.ServiceProvider.GetRequiredService<CasesController>();
+            AiController = Scope.ServiceProvider.GetRequiredService<AiController>();
 
             // 默认绑定匿名的 HttpContext
-            AttachAnonymousContext(MetaController, AuthController, CasesController);
+            AttachAnonymousContext(MetaController, AuthController, CasesController, AiController);
 
             await DbContext.Database.EnsureCreatedAsync();
         }
@@ -154,7 +157,7 @@ namespace YojigenShift.YiXueLab.Tests.API
                 User = principal
             };
 
-            foreach (var controller in new ControllerBase[] { MetaController, AuthController, CasesController })
+            foreach (var controller in new ControllerBase[] { MetaController, AuthController, CasesController, AiController })
             {
                 controller.ControllerContext = new ControllerContext
                 {
